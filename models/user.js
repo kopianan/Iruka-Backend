@@ -1,9 +1,8 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
-const { userGroomerSchema } = require("../models/user_groomer");
 
 const { userCustomerSchema } = require("../models/user_customer");
-var options = { discriminatorKey: "kind" };
+const { userGroomerSchema } = require("../models/user_groomer");
 
 const userSchema = new mongoose.Schema(
   {
@@ -46,18 +45,26 @@ const userSchema = new mongoose.Schema(
       enum: ["groomer", "customer", "owner", "admin"],
       lowercase: true,
       trim: true
+    },
+    userCustomerDetail: {
+      type: userCustomerSchema,
+      required: function () {
+        if (this.userType == 'customer') {
+          return true;
+        }
+      }
+    },
+    userGroomerDetail: {
+      type: userGroomerSchema,
+      required: function () {
+        if (this.userType == 'groomer') {
+          return true;
+        }
+      }
     }
-  },
-  options
+  }
 );
-
 const User = mongoose.model("User", userSchema);
-
-const UserGroomer = User.discriminator("UserGroomer", userGroomerSchema);
-const UserCustomer = User.discriminator(
-  "UserCustomer",
-  new mongoose.Schema({ points: Number }, options)
-);
 
 function validateUser(user) {
   const schema = {
@@ -80,7 +87,17 @@ function validateUser(user) {
       .min(6)
       .max(50),
     picture: Joi.string(),
-    isActive: Joi.boolean()
+    isActive: Joi.boolean(),
+    userCustomerDetail: Joi.object().when('userType', {
+      is: 'customer',
+      then: Joi.object().required(),
+      otherwise: Joi.object().allow(null).default(null)
+    }),
+    userGroomerDetail: Joi.object().when('userType', {
+      is: 'groomer',
+      then: Joi.object().required(),
+      otherwise: Joi.object().allow(null).default(null)
+    })
   };
 
   return Joi.validate(user, schema);
@@ -89,5 +106,3 @@ function validateUser(user) {
 exports.User = User;
 exports.validateUser = validateUser;
 exports.userSchema = userSchema;
-exports.UserGroomer = UserGroomer;
-exports.UserCustomer = UserCustomer;

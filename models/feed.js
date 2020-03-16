@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
 const { userSchema, User } = require("../models/user");
- Joi.objectId =  require('joi-objectid')(Joi); 
+ 
 
 const feedSchema = new mongoose.Schema({
   feed_name: {
