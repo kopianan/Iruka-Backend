@@ -54,7 +54,6 @@ const UserGroomer = mongoose.model("UserGroomerDetail", userGroomerSchema);
 function validateUserGroomer(userGroomer) {
   const schema = {
     isShow: Joi.boolean()
-      .required()
       .required(),
     styling: Joi.number()
       .min(0)

@@ -4,11 +4,15 @@ const { Feed, validate } = require("../models/feed");
 const { User } = require("../models/user");
 const { Role } = require("../models/role");
 
-router.get("/", async (req, res) => {
-  const feed = await Feed.find();
 
+
+router.get('/', async (req, res) => {
+
+  const feed = await Feed.find();
   res.send(feed);
-});
+})
+
+
 
 router.post("/", async (req, res) => {
   const { error } = validate(req.body);
@@ -24,7 +28,7 @@ router.post("/", async (req, res) => {
     res.status(400).send("No kind of roles id");
   }
   if (!roles) return res.status(400).send(roles.error.message);
-  
+
 
   let feed = new Feed({
     feed_name: req.body.feed_name,

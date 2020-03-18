@@ -2,19 +2,44 @@ const express = require("express");
 const Fawn = require("fawn");
 const router = express.Router();
 const mongoose = require("mongoose");
+const bcrypt = require('bcrypt');
 const _ = require("lodash");
+const jwt = require('jsonwebtoken');
+const config = require('config');
 const {
   User,
   validateUser
 } = require("../models/user");
 const { validateUserCustomer } = require('../models/user_customer');
 const { validateUserGroomer } = require('../models/user_groomer');
+const asyncMiddleware = require('../middleware/async');
+
+const authMiddleware = require('../middleware/auth');
+
+
 Fawn.init(mongoose);
 
-router.get("/", async (req, res) => {
+router.get("/me", authMiddleware, asyncMiddleware(async (req, res) => {
+  const user = await User.findById(req.user._id).select("-password");
+  res.send(user);
+}));
+
+
+
+router.get("/", asyncMiddleware(async (req, res) => {
+  
+  throw new Error("error cuk");
   const user = await User.find();
   res.send(user);
-});
+}));
+
+//get data with token given
+// router.get("/", authMiddleware, asyncMiddleware(async (req, res) => {
+//   const user = await User.find();
+//   res.send(user);
+// }));
+
+
 
 router.post("/", async (req, res) => {
   const { error } = validateUser(req.body);
@@ -43,6 +68,10 @@ router.post("/", async (req, res) => {
       userGroomerDetail = null;
   }
 
+  const salt = await bcrypt.genSalt(10);
+  const hashed = await bcrypt.hash(req.body.password, salt);
+
+
   user = new User({
     name: req.body.name,
     password: req.body.password,
@@ -51,9 +80,10 @@ router.post("/", async (req, res) => {
     userCustomerDetail: userCustomerDetail,
     userGroomerDetail: userGroomerDetail
   });
-
+  user.password = hashed;
   await user.save();
-  res.send(user);
+  const token = user.generateAuthToken();
+  res.header("x-auth-token", token).send(user)
 });
 
 module.exports = router;
