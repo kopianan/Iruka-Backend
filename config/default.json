@@ -1,3 +1,4 @@
 {
-    "jwtPrivateKey": "iruka_jwtPrivateKey"
+    "jwtPrivateKey": "iruka_jwtPrivateKey", 
+    "db" : "mongodb://localhost/Iruka"
 }
