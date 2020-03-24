@@ -2,7 +2,7 @@ const express = require("express");
 const Fawn = require("fawn");
 const router = express.Router();
 const mongoose = require("mongoose");
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const _ = require("lodash");
 const {
   User,
@@ -66,8 +66,8 @@ router.post("/", async (req, res) => {
       userGroomerDetail = null;
   }
 
-  const salt = await bcrypt.genSalt(10);
-  const hashed = await bcrypt.hash(req.body.password, salt);
+  // const salt = await bcrypt.genSalt(10);
+  // const hashed = await bcrypt.hash(req.body.password, salt);
 
 
   user = new User({
@@ -78,7 +78,7 @@ router.post("/", async (req, res) => {
     userCustomerDetail: userCustomerDetail,
     userGroomerDetail: userGroomerDetail
   });
-  user.password = hashed;
+  user.password = req.body.password;
   await user.save();
   const token = user.generateAuthToken();
   res.header("x-auth-token", token).send(user)
